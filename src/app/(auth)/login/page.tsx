@@ -32,6 +32,23 @@ export default function LoginPage() {
       return
     }
 
+    // Check if this user has an employee record
+    const supabase2 = createBrowserSupabaseClient()
+    const { data: { user } } = await supabase2.auth.getUser()
+    if (user) {
+      const { data: employee } = await supabase2
+        .from('employees')
+        .select('role')
+        .eq('auth_user_id', user.id)
+        .single()
+
+      if (!employee) {
+        setError('Your account is not linked to an employee record. Contact your administrator.')
+        setLoading(false)
+        return
+      }
+    }
+
     router.push('/')
     router.refresh()
   }
