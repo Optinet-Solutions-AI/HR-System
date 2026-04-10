@@ -9,7 +9,7 @@ import {
   type SortingState,
   type Column,
 } from '@tanstack/react-table'
-import { useState } from 'react'
+import { useState, type ReactNode } from 'react'
 import { ArrowUpDown, Download } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
@@ -32,7 +32,7 @@ function SortButton<T>({
   children,
 }: {
   column: Column<T>
-  children: React.ReactNode
+  children: ReactNode
 }) {
   return (
     <Button
@@ -103,12 +103,10 @@ export function AttendanceTab({ rows, from, to }: Props) {
     state: { sorting },
   })
 
+  const totalDays = rows.reduce((s, r) => s + r.total_days, 0)
+  const totalCompliant = rows.reduce((s, r) => s + r.compliant_days, 0)
   const overallRate =
-    rows.length > 0
-      ? Math.round(
-          (rows.reduce((s, r) => s + r.compliance_rate, 0) / rows.length) * 10,
-        ) / 10
-      : 0
+    totalDays > 0 ? Math.round((totalCompliant / totalDays) * 1000) / 10 : 0
   const flaggedCount = rows.filter(r => r.total_days - r.compliant_days > 0).length
 
   function handleExport() {
