@@ -62,11 +62,11 @@ export function MondayFridayTab({ rows, from, to }: Props) {
     },
     {
       accessorKey: 'monday_wfh',
-      header: ({ column }) => <SortButton column={column}>Mon Violations</SortButton>,
+      header: ({ column }) => <SortButton column={column}>Mon WFH</SortButton>,
     },
     {
       accessorKey: 'friday_wfh',
-      header: ({ column }) => <SortButton column={column}>Fri Violations</SortButton>,
+      header: ({ column }) => <SortButton column={column}>Fri WFH</SortButton>,
     },
     {
       accessorKey: 'violation_count',
@@ -75,7 +75,13 @@ export function MondayFridayTab({ rows, from, to }: Props) {
     {
       accessorKey: 'violation_dates',
       header: 'Dates',
-      cell: ({ row }) => row.original.violation_dates.join(', '),
+      cell: ({ row }) =>
+        row.original.violation_dates
+          .map(d => {
+            const [y, m, day] = d.split('-').map(Number)
+            return new Date(y, m - 1, day).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })
+          })
+          .join(', '),
     },
   ]
 
@@ -88,14 +94,14 @@ export function MondayFridayTab({ rows, from, to }: Props) {
     state: { sorting },
   })
 
-  const totalViolations = rows.reduce((s, r) => s + r.violation_count, 0)
+  const totalViolations = rows.length
 
   function handleExport() {
     const exportRows = rows.map(r => ({
       Employee: `${r.first_name} ${r.last_name}`,
       Month: r.month,
-      'Monday Violations': r.monday_wfh,
-      'Friday Violations': r.friday_wfh,
+      'Monday WFH Count': r.monday_wfh,
+      'Friday WFH Count': r.friday_wfh,
       'Total Violations': r.violation_count,
       'Violation Dates': r.violation_dates.join(', '),
     }))
