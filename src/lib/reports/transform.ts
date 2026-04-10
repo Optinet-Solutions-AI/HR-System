@@ -91,9 +91,10 @@ export function transformAttendance(
   for (const row of byEmployee.values()) {
     row.compliance_rate = row.total_days > 0
       ? oneDecimal((row.compliant_days / row.total_days) * 100)
-      : 100
+      : 100  // unreachable: rows only exist when at least one record was processed
 
     let maxCount = 0
+    // Strict > means first-encountered flag wins on tie, which is deterministic and fine for display.
     for (const [flag, count] of Object.entries(row.flag_counts) as [ComplianceFlag, number][]) {
       if (count > maxCount) {
         maxCount = count
@@ -106,6 +107,10 @@ export function transformAttendance(
     .sort((a, b) => a.last_name.localeCompare(b.last_name) || a.first_name.localeCompare(b.first_name))
 }
 
+/**
+ * Groups WFH schedules by day of week.
+ * @param schedules Must be pre-filtered to status === 'wfh'. Every row is counted as a WFH day.
+ */
 export function transformWfhByDay(schedules: Schedule[]): WfhByDayRow[] {
   const counts: Record<WfhDay, number> = {
     Monday: 0, Tuesday: 0, Wednesday: 0, Thursday: 0, Friday: 0,
@@ -137,6 +142,8 @@ export function transformWfhPerEmployee(
   const weeks = Math.max(1, Math.floor(days / 7))
   const empMap = new Map(employees.map(e => [e.id, e]))
   const wfhCounts = new Map<string, number>()
+  // Employees with zero WFH days in this range are excluded from output.
+  // This is intentional: the WFH Utilization tab focuses on days actually taken.
 
   for (const s of schedules) {
     const emp = empMap.get(s.employee_id)
