@@ -46,8 +46,8 @@ const WFH_DAYS = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday'] as con
 type WfhDay = typeof WFH_DAYS[number]
 
 const DAY_BY_INDEX: Record<number, string> = {
-  0: 'Saturday', 1: 'Sunday', 2: 'Monday', 3: 'Tuesday',
-  4: 'Wednesday', 5: 'Thursday', 6: 'Friday',
+  0: 'Sunday', 1: 'Monday', 2: 'Tuesday', 3: 'Wednesday',
+  4: 'Thursday', 5: 'Friday', 6: 'Saturday',
 }
 
 function oneDecimal(n: number): number {
@@ -171,7 +171,7 @@ export function transformMonFriViolations(
 
   for (const record of records) {
     const dayIndex = getDay(parseISO(record.date))
-    const isMonOrFri = dayIndex === 2 || dayIndex === 6
+    const isMonOrFri = dayIndex === 1 || dayIndex === 5
     if (!isMonOrFri) continue
     if (!(record.flags ?? []).includes('schedule_mismatch')) continue
 
@@ -195,8 +195,8 @@ export function transformMonFriViolations(
     }
 
     const row = byKey.get(key)!
-    if (dayIndex === 2) row.monday_wfh++
-    if (dayIndex === 6) row.friday_wfh++
+    if (dayIndex === 1) row.monday_wfh++
+    if (dayIndex === 5) row.friday_wfh++
     row.violation_count++
     row.violation_dates.push(format(parseISO(record.date), 'MMM d'))
   }

@@ -13,7 +13,7 @@ function rec(overrides: Partial<ComplianceRecord> = {}): ComplianceRecord {
   return {
     id: 'rec-1',
     employee_id: 'emp-1',
-    date: '2026-04-07',      // Monday
+    date: '2026-04-07',      // Tuesday
     week_number: 15,
     expected_status: 'office',
     actual_status: 'in_office_confirmed',
@@ -57,7 +57,7 @@ function sch(overrides: Partial<Schedule> = {}): Schedule {
   return {
     id: 'sch-1',
     employee_id: 'emp-1',
-    date: '2026-04-07',      // Monday
+    date: '2026-04-07',      // Tuesday
     status: 'wfh',
     approved_by: null,
     approved_at: null,
@@ -134,7 +134,7 @@ describe('transformAttendance', () => {
 
 describe('transformWfhByDay', () => {
   it('always returns all 5 weekdays', () => {
-    const rows = transformWfhByDay([sch({ date: '2026-04-07' })]) // Monday only
+    const rows = transformWfhByDay([sch({ date: '2026-04-06' })]) // Monday only
     expect(rows).toHaveLength(5)
     const days = rows.map(r => r.day)
     expect(days).toContain('Tuesday')
@@ -143,9 +143,9 @@ describe('transformWfhByDay', () => {
 
   it('counts WFH days per weekday', () => {
     const schedules = [
-      sch({ date: '2026-04-07' }),  // Monday
-      sch({ id: 'sch-2', employee_id: 'emp-2', date: '2026-04-07' }), // Monday
-      sch({ id: 'sch-3', date: '2026-04-11' }),  // Friday
+      sch({ date: '2026-04-06' }),  // Monday
+      sch({ id: 'sch-2', employee_id: 'emp-2', date: '2026-04-06' }), // Monday
+      sch({ id: 'sch-3', date: '2026-04-10' }),  // Friday
     ]
     const rows = transformWfhByDay(schedules)
     expect(rows.find(r => r.day === 'Monday')!.wfh_count).toBe(2)
@@ -154,8 +154,8 @@ describe('transformWfhByDay', () => {
 
   it('computes pct_of_total (Monday = 1 of 2 total = 50%)', () => {
     const schedules = [
-      sch({ date: '2026-04-07' }),  // Monday
-      sch({ id: 'sch-2', date: '2026-04-08' }),  // Tuesday
+      sch({ date: '2026-04-06' }),  // Monday
+      sch({ id: 'sch-2', date: '2026-04-07' }),  // Tuesday
     ]
     const rows = transformWfhByDay(schedules)
     expect(rows.find(r => r.day === 'Monday')!.pct_of_total).toBe(50)
@@ -168,9 +168,9 @@ describe('transformWfhByDay', () => {
 
   it('sorts output by wfh_count descending', () => {
     const schedules = [
-      sch({ date: '2026-04-08' }),  // Tuesday — 1 entry
-      sch({ id: 'sch-2', date: '2026-04-07' }),  // Monday
-      sch({ id: 'sch-3', date: '2026-04-07', employee_id: 'emp-2' }),  // Monday — 2 entries
+      sch({ date: '2026-04-07' }),  // Tuesday — 1 entry
+      sch({ id: 'sch-2', date: '2026-04-06' }),  // Monday
+      sch({ id: 'sch-3', date: '2026-04-06', employee_id: 'emp-2' }),  // Monday — 2 entries
     ]
     const rows = transformWfhByDay(schedules)
     expect(rows[0].day).toBe('Monday')
@@ -220,9 +220,9 @@ describe('transformWfhPerEmployee', () => {
 describe('transformMonFriViolations', () => {
   it('returns only employees+months with schedule_mismatch on Mon or Fri', () => {
     const records = [
-      rec({ date: '2026-04-07', is_compliant: false, flags: ['schedule_mismatch'] }), // Monday violation
-      rec({ id: 'r2', date: '2026-04-08', is_compliant: false, flags: ['missing_clocking'] }), // Tuesday, different flag
-      rec({ id: 'r3', date: '2026-04-09', is_compliant: true, flags: [] }), // compliant
+      rec({ date: '2026-04-06', is_compliant: false, flags: ['schedule_mismatch'] }), // Monday violation
+      rec({ id: 'r2', date: '2026-04-07', is_compliant: false, flags: ['missing_clocking'] }), // Tuesday, different flag
+      rec({ id: 'r3', date: '2026-04-08', is_compliant: true, flags: [] }), // Wednesday, compliant
     ]
     const rows = transformMonFriViolations(records, [emp()])
     expect(rows).toHaveLength(1)
@@ -232,16 +232,16 @@ describe('transformMonFriViolations', () => {
   it('ignores schedule_mismatch on mid-week days', () => {
     // Wednesday = getDay 3
     const records = [
-      rec({ date: '2026-04-09', is_compliant: false, flags: ['schedule_mismatch'] }), // Wednesday
+      rec({ date: '2026-04-08', is_compliant: false, flags: ['schedule_mismatch'] }), // Wednesday
     ]
     expect(transformMonFriViolations(records, [emp()])).toHaveLength(0)
   })
 
   it('groups violations by employee AND calendar month', () => {
     const records = [
-      rec({ id: 'r1', date: '2026-04-07', is_compliant: false, flags: ['schedule_mismatch'] }),  // Apr Mon
-      rec({ id: 'r2', date: '2026-04-14', is_compliant: false, flags: ['schedule_mismatch'] }),  // Apr Mon
-      rec({ id: 'r3', date: '2026-05-05', is_compliant: false, flags: ['schedule_mismatch'] }),  // May Mon
+      rec({ id: 'r1', date: '2026-04-06', is_compliant: false, flags: ['schedule_mismatch'] }),  // Apr Mon
+      rec({ id: 'r2', date: '2026-04-13', is_compliant: false, flags: ['schedule_mismatch'] }),  // Apr Mon
+      rec({ id: 'r3', date: '2026-05-04', is_compliant: false, flags: ['schedule_mismatch'] }),  // May Mon
     ]
     const rows = transformMonFriViolations(records, [emp()])
     expect(rows).toHaveLength(2)
@@ -251,8 +251,8 @@ describe('transformMonFriViolations', () => {
 
   it('counts Monday and Friday violations separately', () => {
     const records = [
-      rec({ id: 'r1', date: '2026-04-07', is_compliant: false, flags: ['schedule_mismatch'] }),  // Monday
-      rec({ id: 'r2', date: '2026-04-11', is_compliant: false, flags: ['schedule_mismatch'] }),  // Friday
+      rec({ id: 'r1', date: '2026-04-06', is_compliant: false, flags: ['schedule_mismatch'] }),  // Monday
+      rec({ id: 'r2', date: '2026-04-10', is_compliant: false, flags: ['schedule_mismatch'] }),  // Friday
     ]
     const [row] = transformMonFriViolations(records, [emp()])
     expect(row.monday_wfh).toBe(1)
@@ -262,10 +262,10 @@ describe('transformMonFriViolations', () => {
 
   it('populates violation_dates as formatted short dates', () => {
     const records = [
-      rec({ date: '2026-04-07', is_compliant: false, flags: ['schedule_mismatch'] }),
+      rec({ date: '2026-04-06', is_compliant: false, flags: ['schedule_mismatch'] }),
     ]
     const [row] = transformMonFriViolations(records, [emp()])
-    expect(row.violation_dates).toEqual(['Apr 7'])
+    expect(row.violation_dates).toEqual(['Apr 6'])
   })
 
   it('returns empty array when no violations', () => {
