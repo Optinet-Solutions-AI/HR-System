@@ -11,6 +11,7 @@ import {
 } from '@tanstack/react-table'
 import { useState, type ReactNode } from 'react'
 import { ArrowUpDown, Download } from 'lucide-react'
+import Papa from 'papaparse'
 import { Button } from '@/components/ui/button'
 import {
   Table,
@@ -21,7 +22,6 @@ import {
   TableRow,
 } from '@/components/ui/table'
 import type { WfhByDayRow, WfhPerEmpRow } from '@/lib/reports/transform'
-import { downloadCsv } from '@/lib/reports/export'
 
 type Props = {
   byDay: WfhByDayRow[]
@@ -82,7 +82,7 @@ export function WfhUtilizationTab({ byDay, perEmp, from, to }: Props) {
     {
       accessorKey: 'utilisation_rate',
       header: ({ column }) => <SortButton column={column}>Utilisation</SortButton>,
-      cell: ({ row }) => `${row.original.utilisation_rate}%`,
+      cell: ({ row }) => `${row.original.utilisation_rate.toFixed(1)}%`,
     },
   ]
 
@@ -96,28 +96,29 @@ export function WfhUtilizationTab({ byDay, perEmp, from, to }: Props) {
   })
 
   function handleExport() {
-    const popularRows = byDay.map(r => ({
-      Day: r.day,
-      'WFH Days': r.wfh_count,
-      '% of Total': r.pct_of_total,
-    }))
-    const empRows = perEmp.map(r => ({
-      Employee: `${r.first_name} ${r.last_name}`,
-      'WFH Days': r.wfh_days,
-      Entitlement: r.total_wfh_entitlement,
-      'Utilisation %': r.utilisation_rate,
-    }))
-    // Two sections in one CSV, separated by a blank row
-    downloadCsv(
-      [
-        { Section: 'Popular Days' },
-        ...popularRows.map(r => ({ Section: '', ...r })),
-        {},
-        { Section: 'Per Employee' },
-        ...empRows.map(r => ({ Section: '', ...r })),
-      ],
-      `wfh_utilization_${from}_${to}.csv`,
+    const popularCsv = Papa.unparse(
+      byDay.map(r => ({
+        Day: r.day,
+        'WFH Days': r.wfh_count,
+        '% of Total': r.pct_of_total,
+      })),
     )
+    const empCsv = Papa.unparse(
+      perEmp.map(r => ({
+        Employee: `${r.first_name} ${r.last_name}`,
+        'WFH Days': r.wfh_days,
+        Entitlement: r.total_wfh_entitlement,
+        'Utilisation %': r.utilisation_rate,
+      })),
+    )
+    const combined = `Popular Days\n${popularCsv}\n\nPer Employee\n${empCsv}`
+    const blob = new Blob([combined], { type: 'text/csv;charset=utf-8;' })
+    const url = URL.createObjectURL(blob)
+    const anchor = document.createElement('a')
+    anchor.href = url
+    anchor.download = `wfh_utilization_${from}_${to}.csv`
+    anchor.click()
+    URL.revokeObjectURL(url)
   }
 
   return (
