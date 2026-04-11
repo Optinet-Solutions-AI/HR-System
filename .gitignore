@@ -36,3 +36,8 @@ yarn-error.log*
 next-env.d.ts
 
 .vercel
+
+# Playwright auth state (live session cookies — never commit)
+e2e/.auth/
+playwright-report/
+test-results/
