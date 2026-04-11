@@ -1,5 +1,4 @@
 import { test, expect } from '@playwright/test'
-import { format, startOfMonth } from 'date-fns'
 import { AUTH_FILES } from '../fixtures/auth-files'
 
 test.describe('reports page — CSV export', () => {
@@ -23,9 +22,9 @@ test.describe('reports page — CSV export', () => {
   })
 
   test('GET /api/reports/export returns 200 with CSV headers', async ({ page }) => {
-    const today = new Date()
-    const from = format(startOfMonth(today), 'yyyy-MM-dd')
-    const to   = format(today, 'yyyy-MM-dd')
+    // Fixed date range to avoid drift — matches the save-test month used elsewhere in the suite
+    const from = '2027-06-01'
+    const to   = '2027-06-30'
 
     // page.request shares auth cookies from the hradmin storageState
     const response = await page.request.get(

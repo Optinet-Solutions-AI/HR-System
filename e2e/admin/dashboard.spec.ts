@@ -12,9 +12,9 @@ test.describe('admin dashboard', () => {
     await expect(page.getByRole('heading', { name: 'Dashboard' })).toBeVisible()
   })
 
-  test('renders dashboard heading with today\'s date', async ({ page }) => {
+  test('renders a date subheading in the expected format', async ({ page }) => {
     await expect(page.getByRole('heading', { name: 'Dashboard' })).toBeVisible()
-    // Verify the date subheading is present (format: "Saturday, 11 April 2026")
+    // Verify a date subheading is present (format: "Saturday, 11 April 2026")
     await expect(page.getByText(/\w+day, \d+ \w+ \d{4}/)).toBeVisible()
   })
 
