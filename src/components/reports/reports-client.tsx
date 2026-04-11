@@ -2,7 +2,7 @@
 
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
-import { format, startOfMonth, endOfMonth, subMonths, subDays } from 'date-fns'
+import { format, startOfMonth, endOfMonth, subMonths, subDays, isValid, parseISO } from 'date-fns'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -16,11 +16,12 @@ import type {
   WfhPerEmpRow,
   MonFriRow,
 } from '@/lib/reports/transform'
+import type { ReportTab } from '@/lib/types/app'
 
 type Props = {
   from: string
   to: string
-  tab: string
+  tab: ReportTab
   attendanceRows: AttendanceRow[]
   wfhByDay: WfhByDayRow[]
   wfhPerEmp: WfhPerEmpRow[]
@@ -40,7 +41,7 @@ export function ReportsClient({
   const [fromInput, setFromInput] = useState(from)
   const [toInput, setToInput] = useState(to)
 
-  function navigate(newFrom: string, newTo: string, newTab?: string) {
+  function navigate(newFrom: string, newTo: string, newTab?: ReportTab | string) {
     const params = new URLSearchParams({
       from: newFrom,
       to: newTo,
@@ -72,6 +73,9 @@ export function ReportsClient({
   }
 
   function handleApply() {
+    const parsedFrom = parseISO(fromInput)
+    const parsedTo = parseISO(toInput)
+    if (!isValid(parsedFrom) || !isValid(parsedTo) || parsedFrom > parsedTo) return
     navigate(fromInput, toInput)
   }
 
@@ -130,7 +134,7 @@ export function ReportsClient({
         <TabsList>
           <TabsTrigger value="attendance">Attendance</TabsTrigger>
           <TabsTrigger value="wfh">WFH Utilization</TabsTrigger>
-          <TabsTrigger value="monday-friday">Mon/Fri Analysis</TabsTrigger>
+          <TabsTrigger value="monday-friday">Monday/Friday Analysis</TabsTrigger>
         </TabsList>
 
         <TabsContent value="attendance" className="mt-4">
