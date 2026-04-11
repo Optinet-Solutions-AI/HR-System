@@ -415,6 +415,7 @@ export function WfhCalendar({
                         <button
                           key={day.dateStr}
                           type="button"
+                          data-testid={`day-${day.dateStr}`}
                           disabled={!isSelectable}
                           onClick={() => handleToggleDay(day.dateStr)}
                           className={cn(
