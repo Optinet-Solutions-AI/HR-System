@@ -2,7 +2,10 @@ import { defineConfig } from '@playwright/test'
 import { config } from 'dotenv'
 import path from 'path'
 
-// Load .env.local for SUPABASE_SERVICE_ROLE_KEY used by globalSetup/Teardown
+// Load local E2E env (overrides .env.local so tests always run against local Supabase)
+// .env.e2e.local is git-ignored; create it from supabase status output
+config({ path: path.join(__dirname, '../.env.e2e.local'), override: true })
+// Fall back to .env.local for any vars not in .env.e2e.local
 config({ path: path.join(__dirname, '../.env.local') })
 
 export default defineConfig({

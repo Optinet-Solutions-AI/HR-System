@@ -134,8 +134,19 @@ export function WfhCalendar({
     () => buildInitialSelections()
   )
   const [isSaving, setIsSaving] = useState(false)
-  const [hasChanges, setHasChanges] = useState(false)
   const [validationErrors, setValidationErrors] = useState<ValidationViolation[]>([])
+
+  // Count unsaved changes — hasChanges derived from this so toggling back to original shows "No changes"
+  const changeCount = useMemo(() => {
+    const initial = buildInitialSelections()
+    let count = 0
+    daySelections.forEach((status, dateStr) => {
+      if (initial.get(dateStr) !== status) count++
+    })
+    return count
+  }, [daySelections, buildInitialSelections])
+
+  const hasChanges = changeCount > 0
 
   // Warn on unsaved changes before leaving
   useEffect(() => {
@@ -226,7 +237,6 @@ export function WfhCalendar({
         next.set(dateStr, newStatus)
         return next
       })
-      setHasChanges(true)
       setValidationErrors([])
     },
     [isReadOnly, daySelections, weekWfhCounts, wfhPerWeek, mondayFridayCounts, mondayFridayLimits]
@@ -234,7 +244,6 @@ export function WfhCalendar({
 
   const handleReset = useCallback(() => {
     setDaySelections(buildInitialSelections())
-    setHasChanges(false)
     setValidationErrors([])
   }, [buildInitialSelections])
 
@@ -272,7 +281,6 @@ export function WfhCalendar({
       }
 
       toast.success(`Schedule saved successfully (${result.data.saved} days).`)
-      setHasChanges(false)
       router.refresh()
     } catch {
       toast.error('Failed to save. Please check your connection and try again.')
@@ -280,16 +288,6 @@ export function WfhCalendar({
       setIsSaving(false)
     }
   }, [daySelections, month, router])
-
-  // Count unsaved changes
-  const changeCount = useMemo(() => {
-    const initial = buildInitialSelections()
-    let count = 0
-    daySelections.forEach((status, dateStr) => {
-      if (initial.get(dateStr) !== status) count++
-    })
-    return count
-  }, [daySelections, buildInitialSelections])
 
   // Month navigation
   const prevMonth = format(subMonths(monthDate, 1), 'yyyy-MM')
