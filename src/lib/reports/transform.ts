@@ -88,7 +88,7 @@ export function transformAttendance(
     }
   }
 
-  for (const row of byEmployee.values()) {
+  for (const row of Array.from(byEmployee.values())) {
     row.compliance_rate = row.total_days > 0
       ? oneDecimal((row.compliant_days / row.total_days) * 100)
       : 100  // unreachable: rows only exist when at least one record was processed
