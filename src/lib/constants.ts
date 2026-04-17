@@ -4,51 +4,51 @@
 
 export const STATUS_COLORS = {
   office: {
-    bg: 'bg-green-100',
-    text: 'text-green-800',
-    border: 'border-green-200',
+    bg: 'bg-green-100 dark:bg-green-900/30',
+    text: 'text-green-800 dark:text-green-300',
+    border: 'border-green-200 dark:border-green-800',
     dot: 'bg-green-500',
   },
   wfh: {
-    bg: 'bg-blue-100',
-    text: 'text-blue-800',
-    border: 'border-blue-200',
+    bg: 'bg-blue-100 dark:bg-blue-900/30',
+    text: 'text-blue-800 dark:text-blue-300',
+    border: 'border-blue-200 dark:border-blue-800',
     dot: 'bg-blue-500',
   },
   vacation: {
-    bg: 'bg-yellow-100',
-    text: 'text-yellow-800',
-    border: 'border-yellow-200',
+    bg: 'bg-yellow-100 dark:bg-yellow-900/30',
+    text: 'text-yellow-800 dark:text-yellow-300',
+    border: 'border-yellow-200 dark:border-yellow-800',
     dot: 'bg-yellow-500',
   },
   sick_leave: {
-    bg: 'bg-orange-100',
-    text: 'text-orange-800',
-    border: 'border-orange-200',
+    bg: 'bg-orange-100 dark:bg-orange-900/30',
+    text: 'text-orange-800 dark:text-orange-300',
+    border: 'border-orange-200 dark:border-orange-800',
     dot: 'bg-orange-500',
   },
   public_holiday: {
-    bg: 'bg-gray-100',
-    text: 'text-gray-800',
-    border: 'border-gray-200',
+    bg: 'bg-gray-100 dark:bg-gray-800',
+    text: 'text-gray-800 dark:text-gray-300',
+    border: 'border-gray-200 dark:border-gray-700',
     dot: 'bg-gray-500',
   },
   violation: {
-    bg: 'bg-red-100',
-    text: 'text-red-800',
-    border: 'border-red-200',
+    bg: 'bg-red-100 dark:bg-red-900/30',
+    text: 'text-red-800 dark:text-red-300',
+    border: 'border-red-200 dark:border-red-800',
     dot: 'bg-red-500',
   },
   unknown: {
-    bg: 'bg-gray-50',
-    text: 'text-gray-400',
-    border: 'border-gray-100',
+    bg: 'bg-gray-50 dark:bg-gray-800/50',
+    text: 'text-gray-400 dark:text-gray-500',
+    border: 'border-gray-100 dark:border-gray-700',
     dot: 'bg-gray-300',
   },
   not_scheduled: {
-    bg: 'bg-gray-50',
-    text: 'text-gray-400',
-    border: 'border-gray-100',
+    bg: 'bg-gray-50 dark:bg-gray-800/50',
+    text: 'text-gray-400 dark:text-gray-500',
+    border: 'border-gray-100 dark:border-gray-700',
     dot: 'bg-gray-300',
   },
 } as const
@@ -128,3 +128,37 @@ export const RULE_TYPES = {
   MAX_WFH_PER_DAY_OF_WEEK: 'MAX_WFH_PER_DAY_OF_WEEK',
   MIN_OFFICE_PER_TEAM: 'MIN_OFFICE_PER_TEAM',
 } as const
+
+// ==========================================
+// Actual Status → Color Mapping
+// ==========================================
+
+// ==========================================
+// Clocking Status Labels (for expanded history)
+// ==========================================
+
+export const CLOCKING_STATUS_LABELS: Record<string, string> = {
+  'Active Clocking': 'OK',
+  'Broken clocking': 'BROKEN',
+} as const
+
+// ==========================================
+// Location Display Names
+// ==========================================
+
+export const LOCATION_DISPLAY: Record<string, string> = {
+  'Home': 'REMOTE',
+  'Head Office': 'HEAD OFFICE',
+} as const
+
+export const ACTUAL_STATUS_COLOR_MAP: Record<string, keyof typeof STATUS_COLORS> = {
+  in_office_confirmed: 'office',
+  wfh_confirmed: 'wfh',
+  no_clocking: 'unknown',
+  wrong_location: 'violation',
+  broken_clocking: 'violation',
+  no_booking: 'violation',
+  vacation: 'vacation',
+  public_holiday: 'public_holiday',
+  unknown: 'unknown',
+}

@@ -1,8 +1,15 @@
 import { createServerClient } from '@supabase/ssr'
 import { cookies } from 'next/headers'
+import type { SupabaseClient } from '@supabase/supabase-js'
 import type { Database } from '@/lib/types/database'
 
-export async function createServerSupabaseClient() {
+export async function createServerSupabaseClient(): Promise<SupabaseClient<Database>> {
+  if (process.env.NEXT_PUBLIC_DEMO_MODE === 'true') {
+    const { createMockSupabaseClient } = await import('@/lib/mock/client')
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    return createMockSupabaseClient() as any
+  }
+
   const cookieStore = await cookies()
 
   return createServerClient<Database>(

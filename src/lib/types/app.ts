@@ -21,6 +21,21 @@ export type ScheduleStatus = Database['public']['Enums']['schedule_status']
 export type ActualStatus = Database['public']['Enums']['actual_status']
 export type ComplianceFlag = Database['public']['Enums']['compliance_flag']
 
+// Admin calendar grid row (pivoted: one row per employee, dates as columns)
+export type CalendarRow = {
+  employeeId: string
+  employeeName: string
+  officeDaysPerWeek: number
+  dates: Record<string, ScheduleStatus>
+}
+
+// Compliance weekly grid row (pivoted: one row per employee, dates as columns)
+export type ComplianceWeekRow = {
+  employeeId: string
+  employeeName: string
+  dates: Record<string, ComplianceRecord | null>
+}
+
 // API response types
 export type ApiResponse<T> = {
   data: T
@@ -39,4 +54,35 @@ export type PaginatedResponse<T> = {
     limit: number
     totalPages: number
   }
+}
+
+// Reports types
+export const REPORT_TABS = ['attendance', 'wfh', 'monday-friday'] as const
+export type ReportTab = typeof REPORT_TABS[number]
+
+// Dashboard types
+export type DashboardStatusCounts = {
+  inOffice: number
+  wfh: number
+  notClocked: number
+  onLeave: number
+  flagged: number
+}
+
+export type DashboardEmployeeRow = {
+  employeeId: string
+  firstName: string
+  lastName: string
+  expectedStatus: ScheduleStatus | null
+  actualStatus: ActualStatus | null
+  timeIn: string | null
+  timeOut: string | null
+  flags: ComplianceFlag[]
+  isCompliant: boolean | null
+}
+
+export type DashboardData = {
+  counts: DashboardStatusCounts
+  employees: DashboardEmployeeRow[]
+  todayDate: string
 }

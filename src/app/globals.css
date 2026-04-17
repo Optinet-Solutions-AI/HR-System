@@ -65,5 +65,14 @@
   }
   body {
     @apply bg-background text-foreground;
+    -webkit-text-size-adjust: 100%;
+  }
+}
+
+@layer utilities {
+  /* Scrollable table wrapper for mobile */
+  .table-scroll {
+    @apply -mx-4 px-4 overflow-x-auto sm:mx-0 sm:px-0;
+    -webkit-overflow-scrolling: touch;
   }
 }

@@ -346,6 +346,38 @@ export type Database = {
         }
         Relationships: []
       }
+      schedule_locks: {
+        Row: {
+          id: string
+          locked_at: string
+          locked_by: string
+          month: number
+          year: number
+        }
+        Insert: {
+          id?: string
+          locked_at?: string
+          locked_by: string
+          month: number
+          year: number
+        }
+        Update: {
+          id?: string
+          locked_at?: string
+          locked_by?: string
+          month?: number
+          year?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "schedule_locks_locked_by_fkey"
+            columns: ["locked_by"]
+            isOneToOne: false
+            referencedRelation: "employees"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       schedule_rules: {
         Row: {
           applies_to_team_id: string | null

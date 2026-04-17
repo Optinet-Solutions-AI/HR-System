@@ -1,6 +1,12 @@
 import { createServerSupabaseClient } from '@/lib/supabase/server'
+import { syncClockings } from '@/lib/talexio/sync'
+import { z } from 'zod'
 
-export async function POST() {
+const bodySchema = z.object({
+  date: z.string().date().optional(),
+})
+
+export async function POST(request: Request) {
   const supabase = await createServerSupabaseClient()
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) return Response.json({ error: 'Unauthorized' }, { status: 401 })
@@ -15,6 +21,28 @@ export async function POST() {
     return Response.json({ error: 'Forbidden' }, { status: 403 })
   }
 
-  // TODO: Trigger manual Talexio sync using admin client
-  return Response.json({ message: 'Manual sync not yet implemented' })
+  let date: string
+  try {
+    const body = await request.json()
+    const parsed = bodySchema.safeParse(body)
+    if (!parsed.success) {
+      return Response.json({ error: parsed.error.flatten().fieldErrors }, { status: 400 })
+    }
+    date = parsed.data.date ?? todayMalta()
+  } catch {
+    date = todayMalta()
+  }
+
+  try {
+    const result = await syncClockings(date)
+    return Response.json({ date, ...result })
+  } catch (err) {
+    const message = err instanceof Error ? err.message : 'Unknown error'
+    console.error('[sync/trigger]', message)
+    return Response.json({ error: message }, { status: 500 })
+  }
+}
+
+function todayMalta(): string {
+  return new Intl.DateTimeFormat('en-CA', { timeZone: 'Europe/Malta' }).format(new Date())
 }
