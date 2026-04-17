@@ -1,18 +1,19 @@
 'use client'
 
-import { useRouter } from 'next/navigation'
 import { toast } from 'sonner'
 import { createBrowserSupabaseClient } from '@/lib/supabase/client'
 import { LogOut } from 'lucide-react'
 import {
   DropdownMenu,
   DropdownMenuContent,
+  DropdownMenuGroup,
   DropdownMenuItem,
   DropdownMenuLabel,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu'
-import { Button } from '@/components/ui/button'
+import { buttonVariants } from '@/components/ui/button'
+import { cn } from '@/lib/utils'
 
 type UserProfileDropdownProps = {
   employeeName: string
@@ -20,8 +21,6 @@ type UserProfileDropdownProps = {
 }
 
 export function UserProfileDropdown({ employeeName, roleLabel }: UserProfileDropdownProps) {
-  const router = useRouter()
-
   async function handleSignOut() {
     const supabase = createBrowserSupabaseClient()
     const { error } = await supabase.auth.signOut()
@@ -29,8 +28,9 @@ export function UserProfileDropdown({ employeeName, roleLabel }: UserProfileDrop
       toast.error('Failed to sign out')
       return
     }
-    router.push('/login')
-    router.refresh()
+    // Hard navigation clears all RSC cache and avoids race conditions
+    // where the current layout re-renders with a dead session.
+    window.location.href = '/login'
   }
 
   const initials = employeeName
@@ -43,9 +43,10 @@ export function UserProfileDropdown({ employeeName, roleLabel }: UserProfileDrop
   return (
     <DropdownMenu>
       <DropdownMenuTrigger
-        render={
-          <Button variant="ghost" className="w-full justify-start gap-3 px-3 py-2 h-auto" />
-        }
+        className={cn(
+          buttonVariants({ variant: 'ghost' }),
+          'w-full justify-start gap-3 px-3 py-2 h-auto cursor-pointer'
+        )}
       >
         <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-muted text-xs font-medium">
           {initials}
@@ -56,17 +57,21 @@ export function UserProfileDropdown({ employeeName, roleLabel }: UserProfileDrop
         </div>
       </DropdownMenuTrigger>
       <DropdownMenuContent side="top" align="start" sideOffset={8}>
-        <DropdownMenuLabel>
-          <div className="flex flex-col">
-            <span>{employeeName}</span>
-            <span className="text-xs font-normal text-muted-foreground">{roleLabel}</span>
-          </div>
-        </DropdownMenuLabel>
+        <DropdownMenuGroup>
+          <DropdownMenuLabel>
+            <div className="flex flex-col">
+              <span>{employeeName}</span>
+              <span className="text-xs font-normal text-muted-foreground">{roleLabel}</span>
+            </div>
+          </DropdownMenuLabel>
+        </DropdownMenuGroup>
         <DropdownMenuSeparator />
-        <DropdownMenuItem onClick={handleSignOut}>
-          <LogOut className="mr-2" />
-          Sign out
-        </DropdownMenuItem>
+        <DropdownMenuGroup>
+          <DropdownMenuItem onClick={handleSignOut}>
+            <LogOut className="mr-2" />
+            Sign out
+          </DropdownMenuItem>
+        </DropdownMenuGroup>
       </DropdownMenuContent>
     </DropdownMenu>
   )

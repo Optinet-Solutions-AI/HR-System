@@ -8,6 +8,12 @@ import type { Database } from '@/lib/types/database'
 // NEVER import this in client components or "use client" files.
 
 export function createAdminSupabaseClient() {
+  if (process.env.NEXT_PUBLIC_DEMO_MODE === 'true') {
+    // eslint-disable-next-line @typescript-eslint/no-require-imports
+    const { createMockSupabaseClient } = require('@/lib/mock/client')
+    return createMockSupabaseClient() as ReturnType<typeof createClient<Database>>
+  }
+
   return createClient<Database>(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
     process.env.SUPABASE_SERVICE_ROLE_KEY!

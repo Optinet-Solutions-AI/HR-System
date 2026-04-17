@@ -1,4 +1,5 @@
 import { createServerSupabaseClient } from '@/lib/supabase/server'
+import { createAdminSupabaseClient } from '@/lib/supabase/admin'
 import { z } from 'zod'
 
 const updateEmployeeSchema = z.object({
@@ -45,8 +46,9 @@ export async function PATCH(
     return Response.json({ error: parsed.error.flatten().fieldErrors }, { status: 400 })
   }
 
-  // Update employee
-  const { data, error } = await supabase
+  // Update employee via admin client (bypasses RLS — auth/role already verified above)
+  const adminSupabase = createAdminSupabaseClient()
+  const { data, error } = await adminSupabase
     .from('employees')
     .update(parsed.data)
     .eq('id', id)

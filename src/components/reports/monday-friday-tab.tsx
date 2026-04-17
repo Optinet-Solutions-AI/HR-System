@@ -22,7 +22,7 @@ import {
   TableRow,
 } from '@/components/ui/table'
 import type { MonFriRow } from '@/lib/reports/transform'
-import { downloadCsv } from '@/lib/reports/export'
+import { downloadCsv, downloadPdf } from '@/lib/reports/export'
 
 type Props = { rows: MonFriRow[]; from: string; to: string }
 
@@ -96,8 +96,8 @@ export function MondayFridayTab({ rows, from, to }: Props) {
 
   const totalViolations = rows.length
 
-  function handleExport() {
-    const exportRows = rows.map(r => ({
+  function getExportRows() {
+    return rows.map(r => ({
       Employee: `${r.first_name} ${r.last_name}`,
       Month: r.month,
       'Monday WFH Count': r.monday_wfh,
@@ -105,27 +105,41 @@ export function MondayFridayTab({ rows, from, to }: Props) {
       'Total Violations': r.violation_count,
       'Violation Dates': r.violation_dates.join(', '),
     }))
-    downloadCsv(exportRows, `monday_friday_violations_${from}_${to}.csv`)
+  }
+
+  function handleExportCsv() {
+    downloadCsv(getExportRows(), `monday_friday_violations_${from}_${to}.csv`)
+  }
+
+  function handleExportPdf() {
+    downloadPdf(getExportRows(), `monday_friday_violations_${from}_${to}.pdf`, `Monday/Friday Violations (${from} — ${to})`)
   }
 
   return (
     <div className="space-y-4">
-      <div className="flex items-center justify-between">
+      <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         <Card className="inline-flex">
-          <CardContent className="flex items-center gap-4 pt-6 pb-6 px-6">
+          <CardContent className="flex items-center gap-4 pt-4 pb-4 px-4 sm:pt-6 sm:pb-6 sm:px-6">
             <div>
               <p className="text-sm text-muted-foreground">Total Violations</p>
-              <p className="text-3xl font-bold">{totalViolations}</p>
+              <p className="text-2xl font-bold sm:text-3xl">{totalViolations}</p>
             </div>
           </CardContent>
         </Card>
-        <Button variant="outline" size="sm" onClick={handleExport}>
-          <Download className="mr-2 h-4 w-4" />
-          Export CSV
-        </Button>
+        <div className="flex gap-2">
+          <Button variant="outline" size="sm" onClick={handleExportCsv}>
+            <Download className="mr-2 h-4 w-4" />
+            CSV
+          </Button>
+          <Button variant="outline" size="sm" onClick={handleExportPdf}>
+            <Download className="mr-2 h-4 w-4" />
+            PDF
+          </Button>
+        </div>
       </div>
 
-      <div className="rounded-md border">
+      <div className="overflow-x-auto -mx-3 px-3 sm:mx-0 sm:px-0">
+      <div className="rounded-md border min-w-[550px]">
         <Table>
           <TableHeader>
             {table.getHeaderGroups().map(hg => (
@@ -161,6 +175,7 @@ export function MondayFridayTab({ rows, from, to }: Props) {
             )}
           </TableBody>
         </Table>
+      </div>
       </div>
     </div>
   )

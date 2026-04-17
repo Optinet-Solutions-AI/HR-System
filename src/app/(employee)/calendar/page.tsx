@@ -54,8 +54,8 @@ export default async function CalendarPage({
 
   if (schedulesResult.error || holidaysResult.error || rulesResult.error) {
     return (
-      <div className="container mx-auto p-6">
-        <h1 className="text-2xl font-bold mb-4">WFH Calendar</h1>
+      <div className="container mx-auto px-4 py-4 sm:p-6">
+        <h1 className="text-xl font-bold mb-4 sm:text-2xl">WFH Calendar</h1>
         <div className="rounded-lg border border-red-200 bg-red-50 p-4 text-red-800 dark:border-red-800 dark:bg-red-950/50 dark:text-red-200">
           <p className="font-medium">Failed to load calendar data</p>
           <p className="text-sm mt-1">

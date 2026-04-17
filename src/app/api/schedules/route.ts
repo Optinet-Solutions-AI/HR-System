@@ -152,6 +152,22 @@ export async function POST(request: Request) {
     )
   }
 
+  // Reject if the month is already published/locked
+  const [monthNum, yearNum] = [parseInt(month.slice(5), 10), parseInt(month.slice(0, 4), 10)]
+  const { data: lock } = await supabase
+    .from('schedule_locks')
+    .select('id')
+    .eq('month', monthNum)
+    .eq('year', yearNum)
+    .maybeSingle()
+
+  if (lock) {
+    return Response.json(
+      { error: 'This month has been published and can no longer be modified.' },
+      { status: 403 }
+    )
+  }
+
   // Upsert schedule entries
   const { error: upsertError } = await supabase
     .from('schedules')

@@ -7,6 +7,7 @@ export type AttendanceRow = {
   employee_id: string
   first_name: string
   last_name: string
+  business_unit: string | null
   total_days: number
   compliant_days: number
   compliance_rate: number                          // 0–100, one decimal place
@@ -72,6 +73,7 @@ export function transformAttendance(
         employee_id: record.employee_id,
         first_name: emp.first_name,
         last_name: emp.last_name,
+        business_unit: emp.business_unit,
         total_days: 0,
         compliant_days: 0,
         compliance_rate: 0,

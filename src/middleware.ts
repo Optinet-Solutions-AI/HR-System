@@ -4,6 +4,11 @@ import { NextResponse, type NextRequest } from 'next/server'
 const PUBLIC_PATHS = ['/login', '/callback', '/api/cron']
 
 export async function middleware(request: NextRequest) {
+  // Demo mode: bypass all auth checks
+  if (process.env.NEXT_PUBLIC_DEMO_MODE === 'true') {
+    return NextResponse.next()
+  }
+
   const { pathname } = request.nextUrl
 
   // Allow public paths
@@ -56,26 +61,6 @@ export async function middleware(request: NextRequest) {
   if (!user) {
     const url = request.nextUrl.clone()
     url.pathname = '/login'
-    return NextResponse.redirect(url)
-  }
-
-  // Get employee role for routing
-  const { data: employee } = await supabase
-    .from('employees')
-    .select('role')
-    .eq('auth_user_id', user.id)
-    .single()
-
-  // Redirect root path based on role
-  if (pathname === '/') {
-    const url = request.nextUrl.clone()
-    if (!employee) {
-      url.pathname = '/login'
-    } else if (employee.role === 'employee') {
-      url.pathname = '/calendar'
-    } else {
-      url.pathname = '/dashboard'
-    }
     return NextResponse.redirect(url)
   }
 

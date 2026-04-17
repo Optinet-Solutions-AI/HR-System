@@ -12,6 +12,7 @@ import {
 import { useState, type ReactNode } from 'react'
 import { ArrowUpDown, Download } from 'lucide-react'
 import Papa from 'papaparse'
+import { downloadPdf } from '@/lib/reports/export'
 import { Button } from '@/components/ui/button'
 import {
   Table,
@@ -52,7 +53,7 @@ function SortButton<T>({
 
 function InlineBar({ pct }: { pct: number }) {
   return (
-    <div className="w-40 bg-gray-100 rounded-full h-2">
+    <div className="w-24 sm:w-40 bg-gray-100 dark:bg-gray-800 rounded-full h-2">
       <div
         className="bg-blue-500 h-2 rounded-full"
         style={{ width: `${Math.min(100, pct)}%` }}
@@ -95,7 +96,7 @@ export function WfhUtilizationTab({ byDay, perEmp, from, to }: Props) {
     state: { sorting },
   })
 
-  function handleExport() {
+  function handleExportCsv() {
     const popularCsv = Papa.unparse(
       byDay.map(r => ({
         Day: r.day,
@@ -121,18 +122,35 @@ export function WfhUtilizationTab({ byDay, perEmp, from, to }: Props) {
     URL.revokeObjectURL(url)
   }
 
+  function handleExportPdf() {
+    const exportRows = perEmp.map(r => ({
+      Employee: `${r.first_name} ${r.last_name}`,
+      'WFH Days': r.wfh_days,
+      Entitlement: r.total_wfh_entitlement,
+      'Utilisation %': r.utilisation_rate,
+    }))
+    downloadPdf(exportRows, `wfh_utilization_${from}_${to}.pdf`, `WFH Utilization (${from} — ${to})`)
+  }
+
   return (
     <div className="space-y-8">
       {/* Section A: Popular Days */}
       <div className="space-y-3">
-        <div className="flex items-center justify-between">
+        <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
           <h3 className="text-base font-semibold">Popular WFH Days</h3>
-          <Button variant="outline" size="sm" onClick={handleExport}>
-            <Download className="mr-2 h-4 w-4" />
-            Export CSV
-          </Button>
+          <div className="flex gap-2">
+            <Button variant="outline" size="sm" onClick={handleExportCsv}>
+              <Download className="mr-2 h-4 w-4" />
+              CSV
+            </Button>
+            <Button variant="outline" size="sm" onClick={handleExportPdf}>
+              <Download className="mr-2 h-4 w-4" />
+              PDF
+            </Button>
+          </div>
         </div>
-        <div className="rounded-md border">
+        <div className="overflow-x-auto -mx-3 px-3 sm:mx-0 sm:px-0">
+        <div className="rounded-md border min-w-[400px]">
           <Table>
             <TableHeader>
               <TableRow>
@@ -164,12 +182,14 @@ export function WfhUtilizationTab({ byDay, perEmp, from, to }: Props) {
             </TableBody>
           </Table>
         </div>
+        </div>
       </div>
 
       {/* Section B: Per Employee */}
       <div className="space-y-3">
         <h3 className="text-base font-semibold">Per Employee</h3>
-        <div className="rounded-md border">
+        <div className="overflow-x-auto -mx-3 px-3 sm:mx-0 sm:px-0">
+        <div className="rounded-md border min-w-[400px]">
           <Table>
             <TableHeader>
               {table.getHeaderGroups().map(hg => (
@@ -205,6 +225,7 @@ export function WfhUtilizationTab({ byDay, perEmp, from, to }: Props) {
               )}
             </TableBody>
           </Table>
+        </div>
         </div>
       </div>
     </div>

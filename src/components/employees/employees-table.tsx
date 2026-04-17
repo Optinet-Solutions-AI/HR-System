@@ -97,7 +97,7 @@ const columns: ColumnDef<Employee>[] = [
     cell: ({ getValue }) => {
       const active = getValue<boolean>()
       return (
-        <Badge className={active ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-500'}>
+        <Badge className={active ? 'bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-300' : 'bg-gray-100 text-gray-500 dark:bg-gray-800 dark:text-gray-400'}>
           {active ? 'Active' : 'Inactive'}
         </Badge>
       )
@@ -154,8 +154,8 @@ export function EmployeesTable({ employees }: { employees: Employee[] }) {
 
   return (
     <>
-      <div className="flex items-center gap-2 mb-4">
-        <div className="relative max-w-sm flex-1">
+      <div className="flex flex-col gap-2 mb-4 sm:flex-row sm:items-center sm:gap-2">
+        <div className="relative flex-1 sm:max-w-sm">
           <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 size-4 text-muted-foreground" />
           <Input
             placeholder="Search by name or Talexio ID..."
@@ -169,7 +169,8 @@ export function EmployeesTable({ employees }: { employees: Employee[] }) {
         </span>
       </div>
 
-      <div className="rounded-lg border">
+      <div className="overflow-x-auto -mx-4 px-4 sm:mx-0 sm:px-0">
+      <div className="rounded-lg border min-w-[700px]">
         <Table>
           <TableHeader>
             {table.getHeaderGroups().map((headerGroup) => (
@@ -204,6 +205,7 @@ export function EmployeesTable({ employees }: { employees: Employee[] }) {
             )}
           </TableBody>
         </Table>
+      </div>
       </div>
 
       <EditEmployeeDialog

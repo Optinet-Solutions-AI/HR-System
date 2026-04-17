@@ -1,20 +1,41 @@
-import { createServerSupabaseClient } from '@/lib/supabase/server'
+import { z } from 'zod'
+import { requireHrAdmin } from '@/lib/auth/require-hr-admin'
+import { runCompliance } from '@/lib/compliance/engine'
 
-export async function POST() {
-  const supabase = await createServerSupabaseClient()
-  const { data: { user } } = await supabase.auth.getUser()
-  if (!user) return Response.json({ error: 'Unauthorized' }, { status: 401 })
+const schema = z.object({
+  from: z.string().date(),
+  to: z.string().date(),
+})
 
-  const { data: employee } = await supabase
-    .from('employees')
-    .select('role')
-    .eq('auth_user_id', user.id)
-    .single()
-
-  if (!employee || !['hr_admin', 'super_admin'].includes(employee.role)) {
-    return Response.json({ error: 'Forbidden' }, { status: 403 })
+export async function POST(request: Request) {
+  const auth = await requireHrAdmin()
+  if (auth.error) {
+    return Response.json({ error: auth.error }, { status: auth.status })
   }
 
-  // TODO: Run compliance engine using admin client
-  return Response.json({ message: 'Compliance check not yet implemented' })
+  let body: unknown
+  try {
+    body = await request.json()
+  } catch {
+    return Response.json({ error: 'Invalid JSON body' }, { status: 400 })
+  }
+
+  const parsed = schema.safeParse(body)
+  if (!parsed.success) {
+    return Response.json({ error: parsed.error.flatten().fieldErrors }, { status: 400 })
+  }
+
+  const { from, to } = parsed.data
+  if (from > to) {
+    return Response.json({ error: '`from` must not be after `to`' }, { status: 400 })
+  }
+
+  try {
+    const result = await runCompliance(from, to)
+    return Response.json(result)
+  } catch (err) {
+    const message = err instanceof Error ? err.message : 'Unknown error'
+    console.error('[compliance/run]', message)
+    return Response.json({ error: message }, { status: 500 })
+  }
 }

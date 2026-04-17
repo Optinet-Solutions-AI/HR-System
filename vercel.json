@@ -1,0 +1,12 @@
+{
+  "crons": [
+    {
+      "path": "/api/cron/sync-talexio",
+      "schedule": "*/15 7-20 * * 1-5"
+    },
+    {
+      "path": "/api/cron/daily-compliance",
+      "schedule": "0 1 * * *"
+    }
+  ]
+}

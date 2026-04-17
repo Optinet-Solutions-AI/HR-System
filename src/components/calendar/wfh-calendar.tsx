@@ -294,9 +294,9 @@ export function WfhCalendar({
   const nextMonth = format(addMonths(monthDate, 1), 'yyyy-MM')
 
   return (
-    <div className="container mx-auto p-6 max-w-4xl">
-      <div className="flex items-center justify-between mb-6">
-        <h1 className="text-2xl font-bold">WFH Calendar</h1>
+    <div className="container mx-auto px-4 py-4 sm:p-6 max-w-4xl">
+      <div className="flex items-center justify-between mb-4 sm:mb-6">
+        <h1 className="text-xl font-bold sm:text-2xl">WFH Calendar</h1>
       </div>
 
       {isReadOnly && (
@@ -313,7 +313,7 @@ export function WfhCalendar({
 
       <Card>
         <CardHeader>
-          <div className="flex items-center justify-between w-full">
+          <div className="flex flex-col gap-2 w-full sm:flex-row sm:items-center sm:justify-between">
             <div className="flex items-center gap-2">
               <Button
                 variant="outline"
@@ -322,7 +322,7 @@ export function WfhCalendar({
               >
                 <ChevronLeft className="h-4 w-4" />
               </Button>
-              <CardTitle className="text-lg">{monthLabel}</CardTitle>
+              <CardTitle className="text-base sm:text-lg">{monthLabel}</CardTitle>
               <Button
                 variant="outline"
                 size="icon-sm"
@@ -332,7 +332,7 @@ export function WfhCalendar({
               </Button>
             </div>
             {!isReadOnly && (
-              <CardDescription>
+              <CardDescription className="text-xs sm:text-sm">
                 Up to {wfhPerWeek} WFH day{wfhPerWeek !== 1 ? 's' : ''} per week
               </CardDescription>
             )}
@@ -381,7 +381,7 @@ export function WfhCalendar({
                         return (
                           <div
                             key={idx}
-                            className="min-h-[72px] border-r last:border-r-0 bg-muted/20"
+                            className="min-h-[56px] sm:min-h-[72px] border-r last:border-r-0 bg-muted/20"
                           />
                         )
                       }
@@ -391,7 +391,7 @@ export function WfhCalendar({
                           <div
                             key={day.dateStr}
                             className={cn(
-                              'min-h-[72px] border-r last:border-r-0 p-2 flex flex-col',
+                              'min-h-[56px] sm:min-h-[72px] border-r last:border-r-0 p-1.5 sm:p-2 flex flex-col',
                               STATUS_COLORS.public_holiday.bg
                             )}
                           >
@@ -417,7 +417,7 @@ export function WfhCalendar({
                           disabled={!isSelectable}
                           onClick={() => handleToggleDay(day.dateStr)}
                           className={cn(
-                            'min-h-[72px] border-r last:border-r-0 p-2 flex flex-col text-left transition-colors duration-150',
+                            'min-h-[56px] sm:min-h-[72px] border-r last:border-r-0 p-1.5 sm:p-2 flex flex-col text-left transition-colors duration-150',
                             colors.bg,
                             isSelectable && 'hover:ring-2 hover:ring-primary/30 hover:ring-inset cursor-pointer',
                             !isSelectable && 'cursor-default'
@@ -471,18 +471,19 @@ export function WfhCalendar({
         </CardContent>
 
         {!isReadOnly && (
-          <CardFooter className="flex items-center justify-between">
+          <CardFooter className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
             <span className="text-sm text-muted-foreground">
               {hasChanges
                 ? `${changeCount} unsaved change${changeCount !== 1 ? 's' : ''}`
                 : 'No changes'}
             </span>
-            <div className="flex gap-2">
+            <div className="flex gap-2 w-full sm:w-auto">
               <Button
                 variant="outline"
                 size="sm"
                 onClick={handleReset}
                 disabled={!hasChanges || isSaving}
+                className="flex-1 sm:flex-initial"
               >
                 <RotateCcw className="h-3.5 w-3.5 mr-1.5" />
                 Reset
@@ -491,6 +492,7 @@ export function WfhCalendar({
                 size="sm"
                 onClick={handleSave}
                 disabled={!hasChanges || isSaving}
+                className="flex-1 sm:flex-initial"
               >
                 {isSaving ? (
                   <Loader2 className="h-3.5 w-3.5 mr-1.5 animate-spin" />

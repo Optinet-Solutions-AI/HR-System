@@ -51,7 +51,7 @@ export default async function ReportsPage({
 
   if (empError ?? recError ?? schError) {
     return (
-      <div className="container mx-auto p-6">
+      <div className="container mx-auto px-4 py-4 sm:p-6">
         <p className="text-destructive">
           Failed to load report data. Please try again.
         </p>
@@ -64,10 +64,10 @@ export default async function ReportsPage({
   const safeSchedules = wfhSchedules ?? []
 
   return (
-    <div className="container mx-auto p-6">
-      <div className="mb-6">
-        <h1 className="text-2xl font-bold">Reports</h1>
-        <p className="text-sm text-muted-foreground">
+    <div className="container mx-auto px-4 py-4 sm:p-6">
+      <div className="mb-4 sm:mb-8">
+        <h1 className="text-xl font-bold tracking-tight sm:text-2xl">Reports</h1>
+        <p className="mt-1 text-sm text-muted-foreground">
           Compliance summaries and WFH usage across the organisation
         </p>
       </div>
